@@ -56,7 +56,7 @@ def main(argv):
 
 def usage():
     print(sys.argv[0])
-    print "This script will prompt the user to connect a tablet, enable adb logging, and then remotely capture logcat messages"
+    print "This script will prompt the user to upload logcat messages from utility get_logs.py"
 
 
 main(sys.argv[1:])
