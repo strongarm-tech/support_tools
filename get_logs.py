@@ -8,6 +8,8 @@ import os
 import datetime
 import logging
 import socket
+import signal
+import subprocess
 
 config = { 
     'tablet' : 'HA0ZY1ZH',
@@ -114,7 +116,15 @@ def testEndpoint( host, port ):
 
 def beginLogging ( host, port ):
     logging.info("Logging starting for:"+host+":"+str(port)+'"')
-
+    try:
+        p = subprocess.Popen('adb logcat >> sample_adb.txt')
+        p.wait()
+    except KeyboardInterrupt:
+        p.send_signal(signal.SIGINT)
+        p.wait()
+#    logging.debug("Captured output:'" + output)
+   
+    logging.info("Logging ending for:"+host+":"+str(port)+'"')
     return
 
 # prompt user to press Ctrl+C to stop the capture
@@ -131,7 +141,8 @@ def main():
         logging.info("Exiting.")
     else:
         beginLogging( host, config['destination_port'])
-
-
+        logging.info('Attempting to upload the file')
+        stream = os.popen('scp sample_adb.txt sat_support@3.90.70.137:~/CONTENT/')
+        logging.info('File upload complete')
+    exit()    
 main()
-
