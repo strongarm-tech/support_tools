@@ -7,7 +7,7 @@ import warnings
 import os
 import datetime
 import logging
-
+import getopt
 
 # Setup Logging
 logging.basicConfig(filename='upload_results.log', format='%(asctime)s : %(levelname)s : %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.DEBUG)
@@ -42,9 +42,22 @@ def uploadLogFiles():
         logging.info("Status of upload: "+output)
 
 
-def main():
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv, "h","help=")
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+      if opt == '-h':
+          usage()
+          sys.exit()
     uploadLogFiles()
 
+def usage():
+    print(sys.argv[0])
+    print "This script will prompt the user to connect a tablet, enable adb logging, and then remotely capture logcat messages"
 
-main()
+
+main(sys.argv[1:])
 exit()

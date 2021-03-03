@@ -10,6 +10,7 @@ from datetime import datetime
 import logging
 import socket
 import signal
+import getopt
 
 config = { 
     'tablet' : 'HA0ZY1ZH',
@@ -137,7 +138,18 @@ def beginLogging ( host, port ):
 ## Stretch
 # send the log somewhere(?)
 
-def main():
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv, "h","help=")
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+      if opt == '-h':
+          usage()
+          sys.exit()
+
+
     logging.info('Started')
     tablet = tabletConnected();  # dirty, pull the exit logic into main
     setTabletDebug(tablet, config['destination_port'])
@@ -148,4 +160,11 @@ def main():
         beginLogging( host, config['destination_port'])
 
     exit()    
-main()
+
+def usage():
+    print(sys.argv[0])
+    print "This script will prompt the user to connect a tablet, enable adb logging, and then remotely capture logcat messages"
+
+if __name__=='__main__':
+        main(sys.argv[1:])
+
