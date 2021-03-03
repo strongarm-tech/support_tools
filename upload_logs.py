@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# Copyright StrongArm Technologies, All Rights Reserved
+# Mar-02-2021 beadon + adukalev : v0.1 : First release candidate
 
 import sys
 import warnings
