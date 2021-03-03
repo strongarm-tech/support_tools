@@ -5,11 +5,10 @@
 import sys
 import warnings
 import os
-import datetime
+from datetime import datetime
 import logging
 import socket
 import signal
-import subprocess
 
 config = { 
     'tablet' : 'HA0ZY1ZH',
@@ -17,8 +16,10 @@ config = {
     'socket_timeout' : 5
     }
 
+DATE_TIME = date_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
 # Setup Logging
-logging.basicConfig(filename='results.log', format='%(asctime)s : %(levelname)s : %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='results_'+DATE_TIME+'.log', format='%(asctime)s : %(levelname)s : %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.DEBUG)
 
 # define a Handler which writes INFO messages or higher to the sys.stderr
 console = logging.StreamHandler()
@@ -40,7 +41,7 @@ def tabletConnected():
         tablet = ''
     except Exception as e:
         logging.info("Connection to tablet not stable in the USB port. Please wait 5 seconds and try again. If this continues, please call support. Exception: " + str(e))
-        logging.debug("Captured output:'" + output)
+        logging.debug("Captured output:'" + output+ "'")
         exit()
 
     if  lhs == config['tablet']:
@@ -69,7 +70,7 @@ def setTabletDebug(tablet, port):
         logging.info("Tablet '"+tablet+"' set correctly into tcpip mode")
     else:
         logging.info("Tablet '"+tablet+"' NOT set into tcpip mode. Call Support.")
-        logging.debug("Response from adb:'"+output)
+        logging.debug("Response from adb:'"+ output +"'")
         exit()
 
     # instruct the user to disconnect the tablet
@@ -116,13 +117,16 @@ def testEndpoint( host, port ):
 
 def beginLogging ( host, port ):
     logging.info("Logging starting for:"+host+":"+str(port)+'"')
+    output = ''
     try:
-        p = subprocess.Popen('adb logcat >> sample_adb.txt')
-        p.wait()
+        command = 'adb logcat >> adb_logs'+DATE_TIME+'.log'
+        stream = os.popen(command)
+        output = stream.read()
+        output.rstrip()
+
     except KeyboardInterrupt:
-        p.send_signal(signal.SIGINT)
-        p.wait()
-#    logging.debug("Captured output:'" + output)
+        logging.info("Capture stopped.")
+        logging.debug("Captured output:'" + output)
    
     logging.info("Logging ending for:"+host+":"+str(port)+'"')
     return
@@ -141,8 +145,6 @@ def main():
         logging.info("Exiting.")
     else:
         beginLogging( host, config['destination_port'])
-        logging.info('Attempting to upload the file')
-        stream = os.popen('scp sample_adb.txt sat_support@3.90.70.137:~/CONTENT/')
-        logging.info('File upload complete')
+
     exit()    
 main()
