@@ -11,8 +11,8 @@
 [System.Net.ServicePointManager]::DnsRefreshTimeout = 0
 
 
-while( 1 )
-{
+function testPing {
+
     ipconfig /flushdns
 
     $webResponse = $null;
@@ -36,5 +36,42 @@ while( 1 )
 
     $timestamp = Get-Date -Format o;
     Write-Output ($timestamp + ": Request completed");
-    Start-Sleep 2;
+
+}
+
+
+function test204 {
+
+    ipconfig /flushdns
+
+    $webResponse = $null;
+    $timestamp = Get-Date -Format o;
+    Write-Output ($timestamp + ": Start Request to StrongArm Tech generate_204 request");
+
+    try {
+        $webResponse = ( Invoke-WebRequest 'https://dock.strongarmtech.com/prod/generate-204' -Headers @{"Cache-Control"="no-cache"} -DisableKeepAlive -TimeoutSec 60 -UseBasicParsing -Verbose );
+        # This will only execute if the Invoke-WebRequest is successful.
+        $StatusCode = $webResponse.StatusCode
+        $webResponse.Headers | Where-Object {$_.Keys -eq 'State'}
+    }
+    catch {
+        $StatusCode = $_.Exception.Response.StatusCode.value__;
+    }
+    $timestampPrev = $timestamp;
+    $timestamp = Get-Date -Format o;
+    $webResponse.InputFields 
+    Write-Output ($timestamp + ": HTTP Response Code:'" + $StatusCode + "' Response:'" + $webResponse +"' RequestTime:'" + (New-TimeSpan -End $timestamp -Start $timestampPrev ) +"'" );
+    Write-Output ($timestamp + ': RAWCONTENT:' + ( $webResponse | Select-Object -Expand RawContent) );
+
+    $timestamp = Get-Date -Format o;
+    Write-Output ($timestamp + ": Request completed");
+
+}
+
+while( 1 )
+{
+    testPing;
+    test204;
+
+    Start-Sleep 10;
 }
